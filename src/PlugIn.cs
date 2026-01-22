@@ -183,6 +183,7 @@ namespace Landis.Extension.Succession.Density
        
         public override void LoadParameters(string InputParameterFile, ICore mCore)
         {
+            Console.ReadLine();
             ModelCore = mCore;
             EcoregionData.InitializeCore(mCore);
             parameters.Add(Names.ExtensionName, new Parameter<string>(Names.ExtensionName, InputParameterFile));
@@ -308,10 +309,8 @@ namespace Landis.Extension.Succession.Density
 
 
             ISiteVar<Landis.Library.DensityCohorts.ISiteCohorts> DensityCohorts = PlugIn.ModelCore.Landscape.NewSiteVar<Landis.Library.DensityCohorts.ISiteCohorts>();
-            // Convert Density cohorts to biomasscohorts
-            ISiteVar<Landis.Library.BiomassCohorts.ISiteCohorts> biomassCohorts = PlugIn.ModelCore.Landscape.NewSiteVar<Landis.Library.BiomassCohorts.ISiteCohorts>();
-            // Convert Density cohorts to agecohorts
-            ISiteVar<Landis.Library.AgeOnlyCohorts.ISiteCohorts> AgeCohortSiteVar = PlugIn.ModelCore.Landscape.NewSiteVar<Landis.Library.AgeOnlyCohorts.ISiteCohorts>();
+            // Convert Density cohorts to Universal Cohorts
+            ISiteVar<Landis.Library.UniversalCohorts.ISiteCohorts> universalCohorts = PlugIn.ModelCore.Landscape.NewSiteVar<Landis.Library.UniversalCohorts.ISiteCohorts>();
            
             foreach (ActiveSite site in PlugIn.ModelCore.Landscape)
             {
@@ -319,21 +318,14 @@ namespace Landis.Extension.Succession.Density
                 float tempRD = SiteVars.SiteRD[site];
                 DensityCohorts[site] = sitecohorts[site];
 
-                biomassCohorts[site] = sitecohorts[site];
-                if (sitecohorts[site] != null && biomassCohorts[site] == null)
+                universalCohorts[site] = sitecohorts[site];
+                if (sitecohorts[site] != null && universalCohorts[site] == null)
                 {
                     throw new System.Exception("Cannot convert Density SiteCohorts to biomass site cohorts");
                 }
-
-                AgeCohortSiteVar[site] = sitecohorts[site];
-                if (sitecohorts[site] != null && AgeCohortSiteVar[site] == null)
-                {
-                    throw new System.Exception("Cannot convert Density SiteCohorts to age-only site cohorts");
-                }
             }
             ModelCore.RegisterSiteVar(DensityCohorts, "Succession.DensityCohorts");
-            //ModelCore.RegisterSiteVar(biomassCohorts, "Succession.BiomassCohorts");
-            ModelCore.RegisterSiteVar(AgeCohortSiteVar, "Succession.AgeCohorts");          
+            ModelCore.RegisterSiteVar(universalCohorts, "Succession.UniversalCohorts");
         }
 
         /// <summary>This must be called after EcoregionPnET.Initialize() has been called</summary>
@@ -417,11 +409,11 @@ namespace Landis.Extension.Succession.Density
             Landis.Library.DensityCohorts.InitialCommunities.IDataset communities = Landis.Data.Load<Landis.Library.DensityCohorts.InitialCommunities.IDataset>(initialCommunitiesText, parser);
 
             ModelCore.UI.WriteLine("   Reading initial communities map \"{0}\" ...", initialCommunitiesMap);
-            IInputRaster<uintPixel> map;
-            map = ModelCore.OpenRaster<uintPixel>(initialCommunitiesMap);
+            IInputRaster<UIntPixel> map;
+            map = ModelCore.OpenRaster<UIntPixel>(initialCommunitiesMap);
             using (map)
             {
-                uintPixel pixel = map.BufferPixel;
+                UIntPixel pixel = map.BufferPixel;
                 foreach (Site site in ModelCore.Landscape.AllSites)
                 {
                     map.ReadBufferPixel();
@@ -488,7 +480,7 @@ namespace Landis.Extension.Succession.Density
         }
 
 
-        public void AddLittersAndCheckResprouting(object sender, Landis.Library.AgeOnlyCohorts.DeathEventArgs eventArgs)
+        public void AddLittersAndCheckResprouting(object sender, DeathEventArgs eventArgs)
         {
             if (eventArgs.DisturbanceType != null)
             {
@@ -592,6 +584,11 @@ namespace Landis.Extension.Succession.Density
             {
                 return DynamicEcoregions.EstablishProbability[species, sitecohorts[site].Ecoregion];
             }
+        }
+
+        public override void AddCohortData()
+        {
+            // additional cohort code here
         }
     }
 }

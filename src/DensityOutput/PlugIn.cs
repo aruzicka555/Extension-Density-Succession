@@ -3,15 +3,16 @@
 using Landis.Core;
 using Landis.Utilities;
 using Landis.Library.Succession;
-using Landis.Library.BiomassCohorts;
+using Landis.Library.UniversalCohorts;
 using Landis.Library.DensityCohorts;
 using Landis.SpatialModeling;
-using Landis.Library.Biomass;
 using Landis.Library.Metadata;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Landis.Extension.Succession.Density;
+using Landis.Library.Succession.DemographicSeeding;
 
 namespace Landis.Extension.Output.Density
 {
@@ -82,6 +83,9 @@ namespace Landis.Extension.Output.Density
 
         public override void Run()
         {
+            if (Timestep > 0)
+                ClimateRegionData.SetAllEcoregions_FutureAnnualClimate(ModelCore.CurrentTime);
+
             WriteMapForAllSpecies();
 
             if (makeTable)
@@ -109,7 +113,7 @@ namespace Landis.Extension.Output.Density
                     foreach (Site site in PlugIn.ModelCore.Landscape.AllSites)
                     {
                         if (site.IsActive)
-                            pixel.MapCode.Value = ComputeSpeciesTreeNumber(SiteVars.Cohorts[site][species]);
+                            pixel.MapCode.Value = ComputeSpeciesTreeNumber((Landis.Library.DensityCohorts.ISpeciesCohorts)(SiteVars.Cohorts[site][species]));
                         else
                             pixel.MapCode.Value = 0;
 
@@ -123,7 +127,7 @@ namespace Landis.Extension.Output.Density
                     foreach (Site site in PlugIn.ModelCore.Landscape.AllSites)
                     {
                         if (site.IsActive)
-                            pixel.MapCode.Value = (int)(Math.Round(ComputeSpeciesBasal(SiteVars.Cohorts[site][species]), 2) * 100);
+                            pixel.MapCode.Value = (int)(Math.Round(ComputeSpeciesBasal((Landis.Library.DensityCohorts.ISpeciesCohorts)(SiteVars.Cohorts[site][species])), 2) * 100);
                         else
                             pixel.MapCode.Value = 0;
 
@@ -225,8 +229,8 @@ namespace Landis.Extension.Output.Density
 
                 foreach (ISpecies species in ModelCore.Species)
                 {
-                    allSppEcos[ecoregion.Index, species.Index, 0] += ComputeSpeciesTreeNumber(SiteVars.Cohorts[site][species]);
-                    allSppEcos[ecoregion.Index, species.Index, 1] += ComputeSpeciesBasal(SiteVars.Cohorts[site][species]);
+                    allSppEcos[ecoregion.Index, species.Index, 0] += ComputeSpeciesTreeNumber((Landis.Library.DensityCohorts.ISpeciesCohorts)(SiteVars.Cohorts[site][species]));
+                    allSppEcos[ecoregion.Index, species.Index, 1] += ComputeSpeciesBasal((Landis.Library.DensityCohorts.ISpeciesCohorts)(SiteVars.Cohorts[site][species]));
                 }
 
                 activeSiteCount[ecoregion.Index]++;
@@ -259,7 +263,8 @@ namespace Landis.Extension.Output.Density
             double local_const = 3.1415926 / (4 * 10000.00);
             double total = 0;
             if (cohorts != null)
-                total = cohorts.Sum(x => Math.Pow(x.Diameter, 2) * local_const * x.Treenumber);
+                total = cohorts.Sum(x => Math.Pow(((Landis.Library.DensityCohorts.ICohort)x).Diameter, 2) * 
+                    local_const * ((Landis.Library.DensityCohorts.ICohort)x).Treenumber);
             return total;
         }
 
@@ -269,7 +274,7 @@ namespace Landis.Extension.Output.Density
         {
             int total = 0;
             if (cohorts != null)
-                total = cohorts.Sum(x => x.Treenumber);
+                total = cohorts.Sum(x => ((Landis.Library.DensityCohorts.ICohort)x).Treenumber);
             return total;
         }
 
@@ -299,5 +304,9 @@ namespace Landis.Extension.Output.Density
             return total;
         }
 
+        public override void AddCohortData()
+        {
+            // add cohort data here
+        }
     }
 }
