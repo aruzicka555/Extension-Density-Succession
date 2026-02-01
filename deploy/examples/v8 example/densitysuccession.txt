@@ -8,7 +8,7 @@ StartYear	2000
 <<SeedingAlgorithm	WardSeedDispersal						
 SeedingAlgorithm	DensitySeeding						
 								
-InitialCommunities      initial-communities.txt											
+InitialCommunities      initial-communities.csv											
 InitialCommunitiesMap   initialcommunity_test.img	
 
 DensitySpeciesParameters	density_speciesparameters.txt		

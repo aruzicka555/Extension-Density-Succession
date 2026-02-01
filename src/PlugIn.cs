@@ -25,7 +25,7 @@
 //   NOTE: This uses a version (v4?) of the climate library that exposes AnnualClimate_Monthly.MonthlyOzone[] and .MonthlyCO2[].
 
 using Landis.Core;
-using Landis.Library.DensityCohorts.InitialCommunities;
+using Landis.Library.InitialCommunities.Universal;
 using Landis.Library.Succession;
 using Landis.SpatialModeling;
 using Landis.Library.Climate;
@@ -308,9 +308,9 @@ namespace Landis.Extension.Succession.Density
             base.Initialize(ModelCore, SeedAlgorithm);
 
 
-            ISiteVar<Landis.Library.DensityCohorts.ISiteCohorts> DensityCohorts = PlugIn.ModelCore.Landscape.NewSiteVar<Landis.Library.DensityCohorts.ISiteCohorts>();
+            ISiteVar<Landis.Library.DensityCohorts.SiteCohorts> DensityCohorts = PlugIn.ModelCore.Landscape.NewSiteVar<Landis.Library.DensityCohorts.SiteCohorts>();
             // Convert Density cohorts to Universal Cohorts
-            ISiteVar<Landis.Library.UniversalCohorts.ISiteCohorts> universalCohorts = PlugIn.ModelCore.Landscape.NewSiteVar<Landis.Library.UniversalCohorts.ISiteCohorts>();
+            ISiteVar<Landis.Library.UniversalCohorts.SiteCohorts> universalCohorts = PlugIn.ModelCore.Landscape.NewSiteVar<Landis.Library.UniversalCohorts.SiteCohorts>();
            
             foreach (ActiveSite site in PlugIn.ModelCore.Landscape)
             {
@@ -403,10 +403,10 @@ namespace Landis.Extension.Succession.Density
         {
 
             ModelCore.UI.WriteLine("   Loading initial communities from file \"{0}\" ...", initialCommunitiesText);
-            Landis.Library.DensityCohorts.InitialCommunities.DatasetParser parser = new Landis.Library.DensityCohorts.InitialCommunities.DatasetParser(Timestep, ModelCore.Species);
+            Landis.Library.InitialCommunities.Universal.DatasetParser parser = new Landis.Library.InitialCommunities.Universal.DatasetParser(Timestep, ModelCore.Species, additionalCohortParameters, initialCommunitiesText);
 
             //Landis.Library.InitialCommunities.DatasetParser parser = new Landis.Library.InitialCommunities.DatasetParser(Timestep, ModelCore.Species);
-            Landis.Library.DensityCohorts.InitialCommunities.IDataset communities = Landis.Data.Load<Landis.Library.DensityCohorts.InitialCommunities.IDataset>(initialCommunitiesText, parser);
+            Landis.Library.InitialCommunities.Universal.IDataset communities = Landis.Data.Load<Landis.Library.InitialCommunities.Universal.IDataset>(initialCommunitiesText, parser);
 
             ModelCore.UI.WriteLine("   Reading initial communities map \"{0}\" ...", initialCommunitiesMap);
             IInputRaster<UIntPixel> map;
@@ -467,6 +467,9 @@ namespace Landis.Extension.Succession.Density
         
         public override void Run()
         {
+            if (Timestep > 0)
+                ClimateRegionData.SetAllEcoregions_FutureAnnualClimate(ModelCore.CurrentTime);
+
             bool isSuccessionTimestep = (ModelCore.CurrentTime % Timestep == 0);
             //FIXME --- JSF --- Better way to check dynamic parameters?
             if (isSuccessionTimestep && DynamicEcoregions.EcoRegData.ContainsKey(ModelCore.CurrentTime))
@@ -588,7 +591,8 @@ namespace Landis.Extension.Succession.Density
 
         public override void AddCohortData()
         {
-            // additional cohort code here
+            dynamic tempObject = additionalCohortParameters;
+            tempObject.TreeNumber = 0.0f;
         }
     }
 }

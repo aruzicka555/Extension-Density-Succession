@@ -11,7 +11,8 @@ $dlls = "Landis.Library.UniversalCohorts-v1.dll",
 "Landis.Library.Parameters-v2.dll",
 "Landis.Library.Climate-v5.dll",
 "Landis.Library.Succession-v9.dll",
-"Landis.Library.DensityCohorts-v1.dll"
+"Landis.Library.DensityCohorts-v1.dll",
+"Landis.Library.InitialCommunity.Universal.dll"
 #************************************************
 
 

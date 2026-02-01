@@ -224,3 +224,5 @@ deploy/examples/v8 example/spp-density-log.csv
 deploy/examples/v8 example/spp-biomass-log.csv
 deploy/examples/density/Landis-log.txt
 deploy/examples/density/Landis-log.txt
+/deploy/examples/v8 example/Metadata
+/deploy/examples/v8 example/outputs

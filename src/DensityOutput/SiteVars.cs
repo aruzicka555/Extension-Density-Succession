@@ -27,8 +27,6 @@ namespace Landis.Extension.Output.Density
         {
             cohorts = PlugIn.ModelCore.GetSiteVar<Landis.Library.DensityCohorts.SiteCohorts>("Succession.DensityCohorts");
 
-            ISiteVar<Landis.Library.DensityCohorts.SiteCohorts> DensityCohorts = PlugIn.ModelCore.Landscape.NewSiteVar<Landis.Library.DensityCohorts.SiteCohorts>();
-
             if (cohorts == null)
             {
                 string mesg = string.Format("Cohorts are empty.  Please double-check that this extension is compatible with your chosen succession extension.");
