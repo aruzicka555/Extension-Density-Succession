@@ -183,7 +183,6 @@ namespace Landis.Extension.Succession.Density
        
         public override void LoadParameters(string InputParameterFile, ICore mCore)
         {
-            Console.ReadLine();
             ModelCore = mCore;
             EcoregionData.InitializeCore(mCore);
             parameters.Add(Names.ExtensionName, new Parameter<string>(Names.ExtensionName, InputParameterFile));
@@ -541,7 +540,7 @@ namespace Landis.Extension.Succession.Density
                 if (SpeciesDensity[species].MaxSeedDist < 0)
                 {
                     SiteCohorts mySiteCohorts = sitecohorts[site];
-                    foreach (Cohort cohort in mySiteCohorts[species])
+                    foreach (Cohort cohort in mySiteCohorts.AllCohorts)
                     {
                         double loc_term = Math.Pow(cohort.Diameter / 25.4, 1.605);
                         //wenjuan changed on mar 30 2011
@@ -556,7 +555,7 @@ namespace Landis.Extension.Succession.Density
                     List<Cohort> spCohorts = mySiteCohorts.AllCohorts;
                     if (mySiteCohorts[species] != null)
                     {
-                        foreach (Cohort cohort in mySiteCohorts[species])
+                        foreach (Cohort cohort in mySiteCohorts.AllCohorts)
                         {
                             if (cohort.Age > SpeciesDensity[species].Maturity)
                             {
